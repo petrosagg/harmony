@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-echo $TRAVIS_BRANCH
+echo $TRAVIS_PULL_REQUEST_BRANCH
 cd $HOME/gopath/src/github.com/harmony-one
 cd $(go env GOPATH)/src/github.com/harmony-one/harmony-test
 git checkout $TRAVIS_BRANCH || true
