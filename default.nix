@@ -1,38 +1,36 @@
 with import <nixpkgs> {};
 
 let
-  mcl = stdenv.mkDerivation rec {
-    name = "mcl";
-
-    src = fetchFromGitHub {
-      owner = "harmony-one";
-      repo = name;
-      rev = "99e9aa76e84415e753956c618cbc662b2f373df1";
-      hash = "sha256-ee++ddQi7hneDIimTbK/MDNmSaYcQ8+9iRkaMPOwag4=";
-    };
-
-    nativeBuildInputs = [ pkgs.cmake ];
-    buildInputs = [ pkgs.gmp6 pkgs.openssl ];
-  };
-
   bls = stdenv.mkDerivation rec {
     name = "bls";
 
-    src = fetchFromGitHub {
-      owner = "harmony-one";
-      repo = name;
-      rev = "2b7e49894c0f15f5c40cf74046505b7f74946e52";
-      hash = "sha256-lItcbhqHqX0gOoquZCB38AZ8qa+cJhaL+faV3AH1nUQ=";
-    };
+    srcs = [
+      (fetchFromGitHub {
+        owner = "harmony-one";
+        repo = name;
+        rev = "2b7e49894c0f15f5c40cf74046505b7f74946e52";
+        hash = "sha256-lItcbhqHqX0gOoquZCB38AZ8qa+cJhaL+faV3AH1nUQ=";
+        name = name;
+      })
+      (fetchFromGitHub {
+        owner = "harmony-one";
+        repo = "mcl";
+        rev = "99e9aa76e84415e753956c618cbc662b2f373df1";
+        hash = "sha256-ee++ddQi7hneDIimTbK/MDNmSaYcQ8+9iRkaMPOwag4=";
+        name = "mcl";
+      })
+    ];
 
-    nativeBuildInputs = [ pkgs.cmake ];
-    buildInputs = [ mcl pkgs.gmp6 ];
+    sourceRoot = name;
 
-    postInstall = ''
-      ln -s libbls_c256.so $out/lib/libbls256.so
-      ln -s libbls_c384_256.so $out/lib/libbls384_256.so
-      ln -s libbls_c384.so $out/libbls384.so
-    '';
+    dontUseCmakeConfigure = true;
+
+    buildInputs = [ pkgs.gmp6 pkgs.openssl ];
+
+    makeFlags = [ "-j8" "PREFIX=$(out)" ];
+
+    preBuild = "chmod -R u+w ../mcl";
+    postInstall = "make -C ../mcl install 'PREFIX=$(out)'";
   };
 
   hmy = buildGoModule rec {
@@ -48,7 +46,7 @@ let
     vendorSha256 = "6brgs1GeC7h4I6iaws5jNxAcFOJuEQ7X0nFGIPZmnhE=";
     runVend = true;
 
-    buildInputs = [ bls mcl pkgs.gmp6 pkgs.openssl ];
+    buildInputs = [ bls pkgs.gmp6 pkgs.openssl ];
 
     doCheck = false;
     subPackages = [ "cmd" ];
@@ -68,7 +66,7 @@ in buildGoModule rec {
   runVend = true;
 
   nativeBuildInputs = [ hmy ];
-  buildInputs = [ bls mcl pkgs.gmp6 pkgs.openssl ];
+  buildInputs = [ bls pkgs.gmp6 pkgs.openssl ];
 
   doCheck = false;
   subPackages = [ "cmd/harmony" "cmd/bootnode" ];
