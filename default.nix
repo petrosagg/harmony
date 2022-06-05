@@ -35,15 +35,15 @@ let
 
   hmy = buildGoModule rec {
     pname = "hmy";
-    version = "1.2.9";
+    version = "v1-e59f6c2";
 
     src = fetchFromGitHub {
       owner = "harmony-one";
       repo = "go-sdk";
-      rev = "v${version}";
+      rev = "e59f6c2304c7753623e10a675ef3929854237cff";
       hash = "sha256-2qGEIzgWkV8cke7m+brG2WcbDxKCxOoEw8YXWY9q7bE=";
     };
-    vendorSha256 = "6brgs1GeC7h4I6iaws5jNxAcFOJuEQ7X0nFGIPZmnhE=";
+    vendorSha256 = "sha256-6brgs1GeC7h4I6iaws5jNxAcFOJuEQ7X0nFGIPZmnhE=";
     runVend = true;
 
     buildInputs = [ bls pkgs.gmp6 pkgs.openssl ];
